@@ -433,9 +433,6 @@ First, we iterate through all the vertices and compute the new positions by the 
 <p>
     Below, we show the base cube mesh and the cube after 2 and 4 iterations of Loop subdivision. We see that it does not maintain a symmetrical shape, with some of the original vertices remaining sharp and others smoothing out. This is caused by the fact that the degrees of the cube’s vertices in the triangular mesh are not uniform. One has degree 3, three have degree 4, three have degree 5, and one has degree 6. The lower degree vertices result in sharper corners in the limit surface. In a nutshell, the geometrical object of the cube obeys symmetries that are not respected by the symmetries of the mesh.
 </p>
-<p>
-  The strategy we use to solve this problem is to split each diagonal edge on each face of the cube. This leads to a perfectly symmetrical mesh, as shown in the first subfigure below. All vertices are isomorphic to the others and all symmetries of the cube are respected in the symmetries of the mesh. We see that now, this mesh does upsample symmetrically under Loop subdivision. The cube now looks like a rounded cube, rather than a strange oblong object. At the center of each face, we have degree 4 vertices (a total of 6), but this irregularity is inevitable since a cube is topologically equivalent to a sphere.
-</p>
 <div align="middle">
   <table style="width:100%">
     <tr align="center">
@@ -452,7 +449,13 @@ First, we iterate through all the vertices and compute the new positions by the 
         <figcaption>Original mesh with 4 subdivisions.</figcaption>
       </td>
     </tr>
-    <br>
+  </table>
+</div>
+<p>
+  The strategy we use to solve this problem is to split each diagonal edge on each face of the cube. This leads to a perfectly symmetrical mesh, as shown in the first subfigure below. All vertices are isomorphic to the others and all symmetries of the cube are respected in the symmetries of the mesh. We see that now, this mesh does upsample symmetrically under Loop subdivision. The cube now looks like a rounded cube, rather than a strange oblong object. At the center of each face, we have degree 4 vertices (a total of 6), but this irregularity is inevitable since a cube is topologically equivalent to a sphere.
+</p>
+<div align="middle">
+  <table style="width:100%">
     <tr align="center">
       <td>
         <img src="images/cube_sym0.png" align="middle" width="250px"/>
