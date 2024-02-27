@@ -114,7 +114,7 @@
     </tr>
     <br>
     <tr align="center">
-      <td>
+      <td colspan="2">
         <img src="images/bez5.png" align="middle" width="600px"/>
         <figcaption>Level 5 and total curve.</figcaption>
       </td>
@@ -194,7 +194,7 @@ Now that we have the face normal vectors weighted by the face area, we now need 
         <figcaption>Teapot by facet shading.</figcaption>
       </td>
       <td>
-        <img src="images/bez2.png" align="middle" width="400px"/>
+        <img src="images/phong_shade.png" align="middle" width="400px"/>
         <figcaption>Teapot by Phong shading.</figcaption>
       </td>
     </tr>
@@ -368,12 +368,61 @@ First, we iterate through all the vertices and compute the new positions by the 
 <p>
   We demonstrate this below with the cube, following our procedure of symmetrizing the cube as described in the following section. We perform four iterations of Loop subdivision on each mesh. First on the bare cube with the symmetrized mesh, second on the cube with all edges near the boundary of any sharp edge split once, and third with all edges near the boundary of any sharp edge split twice.
 </p>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/cube_sym0.png" align="middle" width="400px"/>
+        <figcaption>Mesh with 0 splits and 0 subdivisions.</figcaption>
+      </td>
+      <td>
+        <img src="images/cube_sym4.png" align="middle" width="400px"/>
+        <figcaption>Mesh with 0 splits and 4 subdivisions.</figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/cube_split_ref.png" align="middle" width="400px"/>
+        <figcaption>Mesh with 1 split and 0 subdivisions.</figcaption>
+      </td>
+      <td>
+        <img src="images/cube_split_lim.png" align="middle" width="400px"/>
+        <figcaption>Mesh with 1 split and 4 subdivisions.</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/cube_doub_ref.png" align="middle" width="400px"/>
+        <figcaption>Mesh with 2 splits and 0 subdivisions.</figcaption>
+      </td>
+      <td>
+        <img src="images/cube_doub_lim.png" align="middle" width="400px"/>
+        <figcaption>Mesh with 2 splits and 4 subdivisions.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 <p>
   We can observe that this procedure still leads to a smooth boundary, but it creates a limit surface that has a sharper transition between faces. The transition is increasingly rapid in each mesh that has more edge splits. The obvious drawback is that the splitting method we employ above introduces vertices of degree four and degree eight. The consequence is that vertices of degree less than six bulge outward in the limit surface and vertices of degree greater than six push inward in the limit surface. These consequences follow from the subdivision rules which weight positions by the surrounding neighbors of each vertex. This leads to the limit surface becoming bumpier as we employ our splitting strategy. We could perform some edge flips to improve the degree at these extraordinary vertices to improve the regularity of the mesh and create a better looking limit surface.
 </p>
 <p>
   We test this by performing some edge flips to have the degree of most vertices be closer to 6. The resultant mesh is shown below (it has the same number of mesh entities as the most refined mesh above that deformed strangely). We see that after doing so, subdivision leads to the desired behavior of sharper edges but clearly a cuboid shape, without the undesired distortion. 
 </p>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/cube_sym0.png" align="middle" width="400px"/>
+        <figcaption>Reorganized mesh with 0 subdivisions.</figcaption>
+      </td>
+      <td>
+        <img src="images/cube_sym4.png" align="middle" width="400px"/>
+        <figcaption>Reorganized mesh with 4 subdivisions.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 <br>
 
 
@@ -386,6 +435,39 @@ First, we iterate through all the vertices and compute the new positions by the 
 <p>
   The strategy we use to solve this problem is to split each diagonal edge on each face of the cube. This leads to a perfectly symmetrical mesh, as shown in the first subfigure below. All vertices are isomorphic to the others and all symmetries of the cube are respected in the symmetries of the mesh. We see that now, this mesh does upsample symmetrically under Loop subdivision. The cube now looks like a rounded cube, rather than a strange oblong object. At the center of each face, we have degree 4 vertices (a total of 6), but this irregularity is inevitable since a cube is topologically equivalent to a sphere.
 </p>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/cube_asym0.png" align="middle" width="400px"/>
+        <figcaption>Original cube mesh with 0 subdivisions.</figcaption>
+      </td>
+      <td>
+        <img src="images/cube_asym1.png" align="middle" width="400px"/>
+        <figcaption>Original cube mesh with 2 subdivisions.</figcaption>
+      </td>
+      <td>
+        <img src="images/cube_asym2.png" align="middle" width="400px"/>
+        <figcaption>Original cube mesh with 4 subdivisions.</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/cube_sym0.png" align="middle" width="400px"/>
+        <figcaption>Symmetric cube mesh with 0 subdivisions.</figcaption>
+      </td>
+      <td>
+        <img src="images/cube_sym1.png" align="middle" width="400px"/>
+        <figcaption>Symmetric cube mesh with 2 subdivisions.</figcaption>
+      </td>
+      <td>
+        <img src="images/cube_sym2.png" align="middle" width="400px"/>
+        <figcaption>Symmetric cube mesh with 4 subdivisions.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 <br>
 
 
@@ -395,6 +477,24 @@ First, we iterate through all the vertices and compute the new positions by the 
 <p>
     We also implemented handling of meshes with boundaries. This required our split function to process boundary edges correctly, as described and shown in Part 5. The only additional aspect required in this method was the appropriate boundary update rules for Loop subdivision. From this source, we have that the boundary update rules are very simple. For an existing vertex, we use a ⅛-¾-⅛ stencil with the two original mesh neighbors of that vertex, and for a new vertex, we use the midpoint of the two original mesh neighbors. This is the rule we implement, which simply requires checking if the vertex or edge we are computing the new position for lies on the boundary of the mesh. We demonstrate Loop subdivision on a mesh with boundary on the VW Beetle mesh below, with one and two iterations of subdivision. We observe that the mesh gets smoother and smoother and that the boundaries are approximately preserved (they also are smoothed out by the subdivision operation).
 </p>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/beetle0.png" align="middle" width="400px"/>
+        <figcaption>VW Beetle mesh with 0 subdivisions.</figcaption>
+      </td>
+      <td>
+        <img src="images/beetle1.png" align="middle" width="400px"/>
+        <figcaption>VW Beetle mesh with 1 subdivision.</figcaption>
+      </td>
+      <td>
+        <img src="images/beetle1.png" align="middle" width="400px"/>
+        <figcaption>VW Beetle mesh with 2 subdivisions.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 <br>
 
 
