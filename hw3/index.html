@@ -75,7 +75,44 @@
   After the closest intersection is found, $\texttt{est_radiance_global_illumination()}$ returns the radiance at this point. The radiance returned by each of the $\texttt{ns_aa}$ sample rays are totaled, then averaged, and we finally update the sample buffer with this value. 
 </p>
 
+<br>
 
+<h3 align="middle">Explain the triangle intersection algorithm you implemented in your own words.</h3>
+
+<p>
+  To implement triangle intersection, we first compute the plane intersection of the ray with the plane on which the triangle lies. We computed this plane by computing the triangle normal vector from the cross product of two of the vectors defined by the triangle’s edges. We first check if the ray is parallel to the plane (within a small tolerance) and exit if true. If the corresponding intersection point in the parameter t was outside of the range defined by the minimum and maximum, we exited with false. If it was within the permissible range, we then computed if the intersection point was within the triangle. To do so, we computed the barycentric coordinates of the point with respect to the triangle and checked if each of the coordinates was positive. We returned true only if we determined the intersection point with the plane to lie within the triangle. We computed the normal at the point by the barycentric average of the normals of each vertex.
+</p>
+
+<br>
+
+<h3 align="middle">Show images with normal shading for a few small .dae files.</h3>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part1/cube.png" align="middle" width="400px"/>
+        <figcaption>cube.dae</figcaption>
+      </td>
+      <td>
+        <img src="images/part1/CBempty.png" align="middle" width="400px"/>
+        <figcaption>CBempty.dae</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/part1/CBspheres.png" align="middle" width="400px"/>
+        <figcaption>CBspheres.dae</figcaption>
+      </td>
+      <td>
+        <img src="images/part1/banana.png" align="middle" width="400px"/>
+        <figcaption>banana.dae</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
   
 </body>
 </html>
