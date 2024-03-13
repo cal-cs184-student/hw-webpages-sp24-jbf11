@@ -19,7 +19,7 @@
     color: #121212;
   }
 </style>
-<title>CS 184 Mesh Edit</title>
+<title>CS 284A Raytracer</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
 
@@ -40,7 +40,7 @@
 
 <h1 align="middle"><a href="https://cal-cs184-student.github.io/hw-webpages-sp24-jbf11/hw2/index.html">Webpage</a></h1>
 <h1 align="middle">CS 284A: Computer Graphics and Imaging, Spring 2024</h1>
-<h1 align="middle">Project 2: Mesh Edit</h1>
+<h1 align="middle">Project 3: Raytracer</h1>
 <h2 align="middle">Dawson Do and Joshua Fernandes</h2>
 
 <br><br>
@@ -49,9 +49,33 @@
 
 <h2 align="middle">Overview</h2>
 <p>
-    Overall, this assignment deals with representations and processing of geometric entities. In the first part of this assignment, we implement Bezier curves and surfaces using de Casteljau’s algorithm. We show how Bezier curves are smooth and demonstrate the steps of the algorithm. In the second part of this assignment, we perform mesh operations with the goal of mesh subdivision by the Loop algorithm. We implement methods that require traversal of the half edge mesh data structure, including computation of the vertex normal by area-weighted average of the face normals, flipping an edge in the mesh, and splitting an edge in the mesh. The first method is necessary for smooth Phong shading and the second and third are necessary for the Loop subdivision algorithm. We also develop an understanding of the Loop subdivision algorithm by applying it to several meshes to see how the geometry deforms and how properties of the underlying entities change. For extra credit, we completed the additional task of handling boundaries of triangular meshes, which is necessary for computing vertex normals, splitting edges, and performing Loop subdivision.
+    Overall, in this assignment, we were able to develop a raytracer and implement a global illumination algorithm. First, in Part 1, we generated rays and wrote methods to intersect our rays with scene objects. This allowed us to render objects by coloring them according to their surface normals and gave us experience with manipulating camera and world coordinates. In Part 2, we got experience with acceleration structures, implementing a bounding volume hierarchy, in which we sorted the scene objects into a tree such that we could efficiently ray trace. Rather than testing each ray against each object, we could test each ray against the tree, reducing computation of intersection to logarithmic rather than linear time per ray (in the number of scene objects). This is necessary for rendering complex scenes.
+</p>
+<p>
+    In Part 3, we handled direct illumination, in which we were able to test Monte Carlo integration methods of lighting. We wrote two methods, one that sampled over the hemisphere and one that sampled over the light source. With this exercise, we learned the importance of sampling the regions where you expect contributions, as lighting sampling proved much more robust than hemisphere lighting, particularly for small light sources. In Part 4, we handled indirect illumination, which is simply computed by sampling reflection of light and recursively computing direct illumination. Through this part, we understood how to perform a global light transport simulation and capture the effects of indirect lighting. We also implemented a Russian roulette algorithm. Finally, in Part 5, we sampled adaptively. This demonstrated the dramatic speedup (order of magnitude) that is possible by on-the-fly estimation of errors and terminating locally when error is small. Essentially, we used resources where they were most needed rather than treating the entire domain as equivalent. This assignment gave us a holistic understanding of ray tracing and illumination algorithms, including the relatively large amount of resources needed for rendering seemingly simple scenes.
 </p>
 <br>
 
+<h2 align="middle">Part 1: Ray Generation and Scene Intersection</h2>
+
+<h3 align="middle">Walk through the ray generation and primitive intersection parts of the rendering pipeline.</h3>
+
+<p>
+    For each pixel, we generate $\texttt{ns_aa}$ number of rays to sample the scene. First, we use $\texttt{gridSampler->get_sample()}$ to get a random sample from $[0,1]\times[0,1]$ and add that to origin, the bottom left corner of the pixel. This point is in the image space. We then call $\texttt{camera->generate_ray()}$ to return a ray that goes from the camera in camera space to that point after it has been transformed from image space onto the sensor plane in camera space. After normalization, this becomes the direction for the ray (camera to sensor coordinate), while the origin is set to be the camera position. 
+</p>
+
+<p>
+    We trace the trajectory of this ray into the world using $\texttt{est_radiance_global_illumination()}$ which returns the radiance at the point in the scene this ray intersects. We determine if the ray intersects with a primitive using $\texttt{bvh->intersect()}$. Within this function, we iterate through all the primitives, checking if the ray hits any and updating the intersection point if we find that the ray hits a primitive that is earlier in its trajectory than the previously-recorded closest intersection. 
+</p>
+
+<p>
+    We trace the trajectory of this ray into the world using $\texttt{est_radiance_global_illumination()}$ which returns the radiance at the point in the scene this ray intersects. We determine if the ray intersects with a primitive using $\texttt{bvh->intersect()}$. Within this function, we iterate through all the primitives, checking if the ray hits any and updating the intersection point if we find that the ray hits a primitive that is earlier in its trajectory than the previously-recorded closest intersection. 
+</p>
+<p>
+  After the closest intersection is found, $\texttt{est_radiance_global_illumination()}$ returns the radiance at this point. The radiance returned by each of the $\texttt{ns_aa}$ sample rays are totaled, then averaged, and we finally update the sample buffer with this value. 
+</p>
+
+
+  
 </body>
 </html>
