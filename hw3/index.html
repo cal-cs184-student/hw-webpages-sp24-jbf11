@@ -82,7 +82,15 @@
 <h3 align="left">Explain the triangle intersection algorithm you implemented in your own words.</h3>
 
 <p>
-  To implement triangle intersection, we first compute the plane intersection of the ray with the plane on which the triangle lies. We computed this plane by computing the triangle normal vector from the cross product of two of the vectors defined by the triangle’s edges. We first check if the ray is parallel to the plane (within a small tolerance) and exit if true. If the corresponding intersection point in the parameter t was outside of the range defined by the minimum and maximum, we exited with false. If it was within the permissible range, we then computed if the intersection point was within the triangle. To do so, we computed the barycentric coordinates of the point with respect to the triangle and checked if each of the coordinates was positive. We returned true only if we determined the intersection point with the plane to lie within the triangle. We computed the normal at the point by the barycentric average of the normals of each vertex.
+  To implement triangle intersection, we first compute the plane intersection of the ray with the plane on which the triangle lies. We computed this plane by computing the triangle normal vector from the cross product of two of the vectors defined by the triangle’s edges. We first check if the ray is parallel to the plane (within a small tolerance) and exit if true. If the corresponding intersection point in the parameter $t$ was outside of the range defined by the minimum and maximum, we exited with false. If it was within the permissible range, we then computed if the intersection point was within the triangle. To do so, we computed the barycentric coordinates of the point with respect to the triangle and checked if each of the coordinates was positive. We returned true only if we determined the intersection point with the plane to lie within the triangle. We computed the normal at the point by the barycentric average of the normals of each vertex.
+</p>
+
+<br>
+
+<h3 align="left">Explain the sphere intersection algorithm you implemented in your own words.</h3>
+
+<p>
+  To implement sphere intersection, we expand out the equation for intersection of a ray and a sphere, which is quadratic in $t$. We then compute the discriminant and if it is negative, both solutions are imaginary and there is no intersection, so we return. If it is positive, we compute the two intersection points. If neither lies within the minimum to maximum range, we return false. If exactly one lies in the range, we return that point, and if both lie in the range, we return the smaller value (since this intersection is first along the ray). We compute the normal as the unit vector in the direction between the center of the sphere and the intersection point.
 </p>
 
 <br>
