@@ -243,7 +243,7 @@
 </p>
 
 <p>
-  The other method we used was lighting samling, in which we took sample rays only in the directions of the light sources in the scene. For point light sources, we use a single sample (since only a single point is needed), and for area light sources, we use a number of samples per source. Using the conversion of the integral from class, we then can average over the samples from each source. For each ray, we compute if it intersects an object before reaching the light source, and if it does, we say that ray provides no direct lighting. If it does not intersect any object, we then compute the contribution to the lighting. Our estimator is now changed, since we have to account for sampling only the area of the light source. The radiance and PDF information is provided by the sample_L() method inherent to the light source.
+  The other method we used was lighting samling, in which we took sample rays only in the directions of the light sources in the scene. For point light sources, we use a single sample (since only a single point is needed), and for area light sources, we use a number of samples per source. Using the conversion of the integral from class, we then can average over the samples from each source. For each ray, we compute if it intersects an object before reaching the light source, and if it does, we say that ray provides no direct lighting. If it does not intersect any object, we then compute the contribution to the lighting. Our estimator is now changed, since we have to account for sampling only the area of the light source. The radiance and PDF information is provided by the $\textt{sample_L()}$ method inherent to the light source.
 </p>
 
 <div align="middle">
@@ -294,6 +294,293 @@
   </table>
 </div>
 <br>
+
+<h3 align="left">Focus on one particular scene with at least one area light and compare the noise levels in soft shadows when rendering with 1, 4, 16, and 64 light rays (the -l flag) and with 1 sample per pixel (the -s flag) using light sampling, not uniform hemisphere sampling.</h3>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part3/bunny_1_1_d.png" align="middle" width="400px"/>
+        <figcaption>1 Light Ray (CBBunny.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part3/bunny_1_4_d.png" align="middle" width="400px"/>
+        <figcaption>4 Light Rays (CBBunny.dae)</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/part3/spheres_1_16_d.png" align="middle" width="400px"/>
+        <figcaption>16 Light Rays (CBBunny.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part3/spheres_1_64_d.png" align="middle" width="400px"/>
+        <figcaption>64 Light Rays (CBBunny.dae)</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<p>
+  In the soft shadows, most clearly below the bunny’s head for example, the smoothness increases dramatically with the number of samples. When there is 1 sample for the light, each pixel in the shadow is either illuminated or not, leading to a lot of noise in the shadow’s penumbra, as some pixels toward the complete shadow happen to hit the light, and some close to the edge happen not to hit the light. There is no smoothness since the pixel is only either lighted or not. Even with 4 samples, we start seeing some smoothness in the penumbra and less noise, yet there are still some pixels that jump out, particularly those at the edges of the penumbra that happen to have one or two unlucky samples that make the pixels look discontinuous with their neighbors. With 64 samples, the penumbra transitions quite smoothly from the region of total shadow and total light. In fact, it should be noted that with one sample per pixel, we even get noise in the regions of total light, since sampling different points in the light source will lead to different intensities, which will have noise relative to the average intensity that we aim to capture. This can be particularly noted high on the walls, where there is dramatically variable distance to the near edge and far edge of the light source, leading to noise in sampling from the light source. This noise emerges due to the fall off of illumination, even though each sample in these regions is indeed reaching the light source.
+</p>
+
+<br>
+
+<h3 align="left">Compare the results between uniform hemisphere sampling and lighting sampling in a one-paragraph analysis.</h3>
+
+<p>
+  The uniform hemisphere sampling is very noisy compared to the lighting sampling. This is because for a small light source, the majority of hemisphere sampled rays will miss the light source. To reduce noise, we need to sample a sufficient amount of rays such that a significant fraction are directed toward the light source. Therefore, we need a sampling rate that is comparable to the inverse of the solid angle of the light source from the point of interest. This is clearly very large for a small area light source and explains the significant noise observed even when using a large number of samples per light source under hemisphere sampling. The effect is particularly pronounced at points where the solid angle of the light source is diminished, such as points high on the walls. With lighting sampling, we completely avoid this issue by specifically sampling only rays that are aimed toward the light source. Thus, we reduce the number of samples needed by a factor of the solid angle of the light source. This is why even though using 64 uniform hemisphere samples produces an extremely noisy render, using 4 lighting samples can produce a relatively passable render. Using lighting sampling becomes increasingly important as the light source approaches a point, where hemisphere sampling will always fail (zero probability of hitting the light) and lighting sampling needs only 1 sample (for the point itself!).
+</p>
+
+<br>
+
+<h2 align="middle">Part 4: Global Illumination</h2>
+
+<br>
+
+<h3 align="left">Walk through your implementation of the indirect lighting function.</h3>
+
+<p>
+  To compute the indirect lighting function, we start with a given ray. We compute the zero-bounce lighting by checking if the ray’s first intersection is a light source. Next, we call the recursive $\textt{at_least_one_bounce_radiance()}$ function on the intersection point and return the sum of the zero (direct) and at least one bounce (indirect) light, as this gives the total radiance. The $\textt{at_least_one_bounce_radiance()}$ function takes the intersection point and generates an incoming ray sample for the point. We then compute the direct light coming from that ray and recursively call the indirect light function on the intersection point with the new ray. To terminate the recursion, we have two end conditions. First, we have $\textt{max_ray_depth}$, an argument that dictates the maximum number of bounces. If we reach this, we terminate and ignore any light with more bounces. Second, if the ray does not intersect any objects in the scene, we return zero for the ray. Thus, we are able to capture both direct and indirect light up to a specified depth.
+</p>
+
+<p>
+  However, this will always be an underestimate, since we ignore light at further depths, and sometimes, more depth will be necessary if we have highly reflective surfaces (limited absorption). Our estimate of the lighting is therefore biased under the method described above. Accordingly, we also implement a Russian Roulette algorithm as a third stopping criterion for the recursion. Under this scheme, at any step, we stop with probability $p$. Then, we weight the computed radiance of a ray by $1/(1-p)$, such that we add the correct radiance in expectation. In the limit of having infinite maximum bounce depth (subject to random termination), we have an unbiased estimate of the true radiance with infinite bounces. In practice, by choosing $p$ appropriately, we will always terminate in a reasonable number of steps, as the probability of proceeding for a high number of steps decays exponentially.
+</p>
+
+<br>
+
+<h3 align="left">Show some images rendered with global (direct and indirect) illumination. Use 1024 samples per pixel.</h3>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part4/bench_1024_4_accum_5.png" align="middle" width="400px"/>
+        <figcaption>bench.dae</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/dragon_1024_4_accum_5.png" align="middle" width="400px"/>
+        <figcaption>dragon.dae</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h3 align="left">Pick one scene and compare rendered views first with only direct illumination, then only indirect illumination. Use 1024 samples per pixel. (You will have to edit PathTracer::at_least_one_bounce_radiance(...) in your code to generate these views.)</h3>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part4/bunny_1024_4_direct.png" align="middle" width="400px"/>
+        <figcaption>Only direct illumination (CBBunny.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/bunny_1024_4_indirect.png" align="middle" width="400px"/>
+        <figcaption>Only indirect illumination (CBBunny.dae)</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<p>
+  The direct illumination includes the zero bounce and one bounce light. The indirect illumination includes all illumination beyond two bounces. For the image shown here, we impose a maximum ray depth of 5 bounces. We see that the direct illumination provides the majority of the light on most surfaces (except the shadowed regions), but that this light is quite hard. The indirect light is softer and provides a more uniform glow around the environment. When we overlay the direct and indirect light, we get a more robust and rich visual experience, with the sharpness of the direct light and the softness of the indirect light. We also see that for the material parameters in this rendering, the indirect illumination provides a sizable amount of light as the images are not that different in their brightnesses.
+</p>
+
+<br>
+
+<h3 align="left">For CBbunny.dae, mth bounce with max_ray_depth set to 0, 1, 2, 3, 4, 5 (the -m flag). Use 1024 samples per pixel.</h3>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part4/bunny_1024_4_level_0.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 0$ (CBbunny.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/bunny_1024_4_level_1.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 1$ (CBbunny.dae)</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center"><td>
+        <img src="images/part4/bunny_1024_4_level_2.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 2$ (CBbunny.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/bunny_1024_4_level_3.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 3$ (CBbunny.dae)</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/part4/bunny_1024_4_level_4.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 4$ (CBbunny.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/bunny_1024_4_level_5.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 5$ (CBbunny.dae)</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+  
+<p>
+  These renders use 4 light rays with 1024 samples per pixel. For the second bounce of light, we are able to see that the shadowy side of the bunny starts to be indirectly illuminated by the light bouncing off the walls. This causes the right side of the bunny to be a pale red and the right to be pale blue. The underside is illuminated by light bouncing off the ground. The third bounce is more subtle, but we see that the shadow of the bunny gets lighter as the light that bounced from the underside of the bunny illuminates the shadow (first bounce anywhere, second bounce underside of bunny, third bounce floor below bunny).
+</p>
+
+<br>
+
+<h3 align="left">For CBbunny.dae, compare rendered views with max_ray_depth set to 0, 1, 2, 3, and 4 (the -m flag). Use 1024 samples per pixel.</h3>
+
+<p>
+  These renders use 4 light rays with 1024 samples per pixel.
+</p>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part4/bunny_1024_4_accum_0.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 0$ (CBbunny.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/bunny_1024_4_accum_1.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 1$ (CBbunny.dae)</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/part4/bunny_1024_4_accum_2.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 2$ (CBbunny.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/bunny_1024_4_accum_3.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 3$ (CBbunny.dae)</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/part4/bunny_1024_4_accum_4.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 4$ (CBbunny.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/bunny_1024_4_accum_5.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 5$ (CBbunny.dae)</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h3 align="left">For CBbunny.dae, compare rendered views with max_ray_depth set to 0, 1, 2, 3, and 100 (the -m flag). Russian Roulette. Use 1024 samples per pixel.</h3>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part4/bunny_1024_4_rr_0.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 0$ (CBbunny.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/bunny_1024_4_rr_1.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 1$ (CBbunny.dae)</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/part4/bunny_1024_4_rr_2.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 2$ (CBbunny.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/bunny_1024_4_rr_3.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 3$ (CBbunny.dae)</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/part4/bunny_1024_4_rr_4.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 4$ (CBbunny.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/bunny_1024_4_rr_5.png" align="middle" width="400px"/>
+        <figcaption>$\textt{max_ray_depth} = 5$ (CBbunny.dae)</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+  
+<p>
+  The above renders were computed using a stopping probability of 0.2. As with the previous analysis of a fixed depth, we see that adding levels to the depth provides a richer illumination with greater indirect illumination. However, we find that when we use a fixed depth, there is an increase in brightness with each layer associated with the diffuse indirect light from each level of bounces. In Russian roulette on the other hand, we see a less dramatic increase in brightness. There is still some increase in the brightness, since the Russian roulette estimator is biased when we impose a maximum depth, but the effect is greatly diminished. This is because many rays exit before reaching the maximum depth and have their brightnesses adjusted accordingly. Overall, the renders are quite similar to the corresponding renders where all rays traverse the maximum depth, but these were computed in dramatically decreased time when compared to the maximum depth renders. We could get even further decreased time by increasing the stopping probability at the cost of introducing additional noise. For our given stopping probability and choice of 1024 samples per pixel, we do not see a severe amount of noise.
+</p>
+
+<br>
+
+<h3 align="left">Pick one scene and compare rendered views with various sample-per-pixel rates, including at least 1, 2, 4, 8, 16, 64, and 1024. Use 4 light rays.</h3>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part4/spheres_1_4_accum_5.png" align="middle" width="400px"/>
+        <figcaption>1 sample per pixel (CBspheres.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/spheres_2_4_accum_5.png" align="middle" width="400px"/>
+        <figcaption>2 sample per pixel (CBspheres.dae)</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <<td>
+        <img src="images/part4/spheres_4_4_accum_5.png" align="middle" width="400px"/>
+        <figcaption>4 sample per pixel (CBspheres.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/spheres_8_4_accum_5.png" align="middle" width="400px"/>
+        <figcaption>8 sample per pixel (CBspheres.dae)</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/part4/spheres_16_4_accum_5.png" align="middle" width="400px"/>
+        <figcaption>16 sample per pixel (CBspheres.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/spheres_64_4_accum_5.png" align="middle" width="400px"/>
+        <figcaption>64 sample per pixel (CBspheres.dae)</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/part4/spheres_1024_4_accum_5.png" align="middle" width="400px"/>
+        <figcaption>1024 sample per pixel (CBspheres.dae)</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<p>
+  Here we show rendered views of the Cornell box with Lambertian spheres at the different pixel sampling rates. Each render looks approximately the same in expectation, just with different levels of noise. The one sample per pixel render is very noisy relative to the 1024 sample per pixel render which has essentially no discernible noise. The 64 sample per pixel render has noise that appears like a grain on the image, and the 16 sample per pixel render appears slightly grainier. By 1 sample, it is hard to think of the noise as grain, as it is extremely noisy. However, all images do show soft shadows and indirect lighting associated with several bounces, as we use 5 levels maximum bounces in each of these renders. The effect of fewer samples per pixel is essentially that we increase grain, which we can associate in a real camera with a shorter exposure time or equivalently, a smaller aperture size (fewer photons reach the sensor).
+</p>
   
 </body>
 </html>
