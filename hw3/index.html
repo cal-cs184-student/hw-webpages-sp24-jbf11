@@ -205,15 +205,6 @@
     </tr>
     <br>
     <tr align="left">
-      <th style="border:1px solid black;">Rendering w/o BVH</th>
-      <td style="border:1px solid black;">9.1695</td>
-      <td style="border:1px solid black;">23.8812</td>
-      <td style="border:1px solid black;">31.2788</td>
-      <td style="border:1px solid black;">N/A</td>
-      <td style="border:1px solid black;">N/A</td>
-    </tr>
-    <br>
-    <tr align="left">
       <th style="border:1px solid black;">Building BVH</th>
       <td style="border:1px solid black;">0.0050</td>
       <td style="border:1px solid black;">0.0215</td>
@@ -451,10 +442,6 @@
 
 <h3 align="left">For CBbunny.dae, compare rendered views with max_ray_depth set to 0, 1, 2, 3, and 4 (the -m flag). Use 1024 samples per pixel.</h3>
 
-<p>
-  These renders use 4 light rays with 1024 samples per pixel.
-</p>
-
 <div align="middle">
   <table style="width:100%">
     <tr align="center">
@@ -491,6 +478,12 @@
     </tr>
   </table>
 </div>
+<br>
+
+<p>
+  These renders use 4 light rays with 1024 samples per pixel. They are simply the superposition of the above images up to the specified depth. Due to the darkening of each level’s contribution, the images appear to converge by the 5th image, although there is some additional brightness with each increased depth. For instance, this is particularly noticeable in the corners that do not have much light to begin with. In addition, the diffuse, soft, indirect lighting’s contribution becomes more visible with each progressive layer of depth. For example on the ceiling by the red wall, the hint of red is much more clearly visible in 5 levels than it is in 4 levels. In general, due to the diffuse light scattering we employ here with relatively low reflectance, dissipation means that our images converge well in this number of bounces. If we had very reflective materials, we would not find such a convergence.
+</p>
+
 <br>
 
 <h3 align="left">For CBbunny.dae, compare rendered views with max_ray_depth set to 0, 1, 2, 3, and 100 (the -m flag). Russian Roulette. Use 1024 samples per pixel.</h3>
