@@ -123,19 +123,19 @@
 <h3 align="left">Walk through your BVH construction algorithm. Explain the heuristic you chose for picking the splitting point.</h3>
 
 <p>
-    We construct the BVH using a recursive algorithm. Given the (sub) vector of primitives, we first create the bounding box that holds all the primitives. If the number of primitives is less than or equal to the max leaf size, we create a leaf node by assigning its start and end iterators to those passed in by the function call. Otherwise, we need to determine how to split the bounding box and partition the primitives using $\textt{findBestSplit()}$. 
+    We construct the BVH using a recursive algorithm. Given the (sub) vector of primitives, we first create the bounding box that holds all the primitives. If the number of primitives is less than or equal to the max leaf size, we create a leaf node by assigning its start and end iterators to those passed in by the function call. Otherwise, we need to determine how to split the bounding box and partition the primitives using $\texttt{findBestSplit()}$. 
 </p>
 
 <p>
-  Our method to find the best split tests $\textt{BINS}-1$ number of uniformly spaced splits across the width of the bounding box, for each of the three axes. In practice, we found that $\textt{BINS}=8$, a total of 27 different split possibilities, was sufficient for speedup. For each axis, we first find the bounding width of all the centroids of the primitives. Then, we determine which of the $\textt{BINS}$ bins a primitive belongs to. Additionally, we compute the bounding box of all the primitives in each bin.
+  Our method to find the best split tests $\texttt{BINS}-1$ number of uniformly spaced splits across the width of the bounding box, for each of the three axes. In practice, we found that $\texttt{BINS}=8$, a total of 27 different split possibilities, was sufficient for speedup. For each axis, we first find the bounding width of all the centroids of the primitives. Then, we determine which of the $\texttt{BINS}$ bins a primitive belongs to. Additionally, we compute the bounding box of all the primitives in each bin.
 </p>
 
 <p>
-  To evaluate the cost of each split we use the surface area heuristic (SAH). For each split, we count and determine the surface area of the bounding box of all primitives on each side. This is achieved in one pass through the bins since we collected the number of primitives in and the bounding box of each bin—we keep a running sum of the left side of the split and the right side as we iterate through each split. Then for each split, we calculate the cost of the split using the SAH and keep track of the minimum, as well as the corresponding axis and split position. Finally, we return the least cost split position, the splitting axis, and the number of primitives on the left of the split ($\textt{l_count}$).
+  To evaluate the cost of each split we use the surface area heuristic (SAH). For each split, we count and determine the surface area of the bounding box of all primitives on each side. This is achieved in one pass through the bins since we collected the number of primitives in and the bounding box of each bin—we keep a running sum of the left side of the split and the right side as we iterate through each split. Then for each split, we calculate the cost of the split using the SAH and keep track of the minimum, as well as the corresponding axis and split position. Finally, we return the least cost split position, the splitting axis, and the number of primitives on the left of the split ($\texttt{l_count}$).
 </p>
 
 <p>
-  We then must split our vector of primitives that was passed in. First we initialize the non-leaf node with the bounding box of all the primitives. We create the children using recursive calls to $\textt{construct_bvh()}$. Because the function takes in the $\textt{start}$ and $\textt{end}$ iterator of a subvector, we accomplish this split by re-sorting the subvector such that the primitives with a centroid to the left of the split are on the left of the subvector. Then, to call the function recursively to create the left child, we simply pass in start and $\textt{start} + \textt{l_count}$ for the start and end. We pass in $\textt{start} + \textt{l_count}$ and end for the right child.
+  We then must split our vector of primitives that was passed in. First we initialize the non-leaf node with the bounding box of all the primitives. We create the children using recursive calls to $\texttt{construct_bvh()}$. Because the function takes in the $\texttt{start}$ and $\texttt{end}$ iterator of a subvector, we accomplish this split by re-sorting the subvector such that the primitives with a centroid to the left of the split are on the left of the subvector. Then, to call the function recursively to create the left child, we simply pass in start and $\texttt{start} + \texttt{l_count}$ for the start and end. We pass in $\texttt{start} + \texttt{l_count}$ and end for the right child.
 </p>
 
 <br>
@@ -243,7 +243,7 @@
 </p>
 
 <p>
-  The other method we used was lighting samling, in which we took sample rays only in the directions of the light sources in the scene. For point light sources, we use a single sample (since only a single point is needed), and for area light sources, we use a number of samples per source. Using the conversion of the integral from class, we then can average over the samples from each source. For each ray, we compute if it intersects an object before reaching the light source, and if it does, we say that ray provides no direct lighting. If it does not intersect any object, we then compute the contribution to the lighting. Our estimator is now changed, since we have to account for sampling only the area of the light source. The radiance and PDF information is provided by the $\textt{sample_L()}$ method inherent to the light source.
+  The other method we used was lighting samling, in which we took sample rays only in the directions of the light sources in the scene. For point light sources, we use a single sample (since only a single point is needed), and for area light sources, we use a number of samples per source. Using the conversion of the integral from class, we then can average over the samples from each source. For each ray, we compute if it intersects an object before reaching the light source, and if it does, we say that ray provides no direct lighting. If it does not intersect any object, we then compute the contribution to the lighting. Our estimator is now changed, since we have to account for sampling only the area of the light source. The radiance and PDF information is provided by the $\texttt{sample_L()}$ method inherent to the light source.
 </p>
 
 <div align="middle">
@@ -345,7 +345,7 @@
 <h3 align="left">Walk through your implementation of the indirect lighting function.</h3>
 
 <p>
-  To compute the indirect lighting function, we start with a given ray. We compute the zero-bounce lighting by checking if the ray’s first intersection is a light source. Next, we call the recursive $\textt{at_least_one_bounce_radiance()}$ function on the intersection point and return the sum of the zero (direct) and at least one bounce (indirect) light, as this gives the total radiance. The $\textt{at_least_one_bounce_radiance()}$ function takes the intersection point and generates an incoming ray sample for the point. We then compute the direct light coming from that ray and recursively call the indirect light function on the intersection point with the new ray. To terminate the recursion, we have two end conditions. First, we have $\textt{max_ray_depth}$, an argument that dictates the maximum number of bounces. If we reach this, we terminate and ignore any light with more bounces. Second, if the ray does not intersect any objects in the scene, we return zero for the ray. Thus, we are able to capture both direct and indirect light up to a specified depth.
+  To compute the indirect lighting function, we start with a given ray. We compute the zero-bounce lighting by checking if the ray’s first intersection is a light source. Next, we call the recursive $\texttt{at_least_one_bounce_radiance()}$ function on the intersection point and return the sum of the zero (direct) and at least one bounce (indirect) light, as this gives the total radiance. The $\texttt{at_least_one_bounce_radiance()}$ function takes the intersection point and generates an incoming ray sample for the point. We then compute the direct light coming from that ray and recursively call the indirect light function on the intersection point with the new ray. To terminate the recursion, we have two end conditions. First, we have $\texttt{max_ray_depth}$, an argument that dictates the maximum number of bounces. If we reach this, we terminate and ignore any light with more bounces. Second, if the ray does not intersect any objects in the scene, we return zero for the ray. Thus, we are able to capture both direct and indirect light up to a specified depth.
 </p>
 
 <p>
@@ -403,32 +403,32 @@
     <tr align="center">
       <td>
         <img src="images/part4/bunny_1024_4_level_0.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 0$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 0$ (CBbunny.dae)</figcaption>
       </td>
       <td>
         <img src="images/part4/bunny_1024_4_level_1.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 1$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 1$ (CBbunny.dae)</figcaption>
       </td>
     </tr>
     <br>
     <tr align="center"><td>
         <img src="images/part4/bunny_1024_4_level_2.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 2$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 2$ (CBbunny.dae)</figcaption>
       </td>
       <td>
         <img src="images/part4/bunny_1024_4_level_3.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 3$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 3$ (CBbunny.dae)</figcaption>
       </td>
     </tr>
     <br>
     <tr align="center">
       <td>
         <img src="images/part4/bunny_1024_4_level_4.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 4$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 4$ (CBbunny.dae)</figcaption>
       </td>
       <td>
         <img src="images/part4/bunny_1024_4_level_5.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 5$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 5$ (CBbunny.dae)</figcaption>
       </td>
     </tr>
   </table>
@@ -452,33 +452,33 @@
     <tr align="center">
       <td>
         <img src="images/part4/bunny_1024_4_accum_0.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 0$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 0$ (CBbunny.dae)</figcaption>
       </td>
       <td>
         <img src="images/part4/bunny_1024_4_accum_1.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 1$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 1$ (CBbunny.dae)</figcaption>
       </td>
     </tr>
     <br>
     <tr align="center">
       <td>
         <img src="images/part4/bunny_1024_4_accum_2.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 2$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 2$ (CBbunny.dae)</figcaption>
       </td>
       <td>
         <img src="images/part4/bunny_1024_4_accum_3.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 3$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 3$ (CBbunny.dae)</figcaption>
       </td>
     </tr>
     <br>
     <tr align="center">
       <td>
         <img src="images/part4/bunny_1024_4_accum_4.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 4$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 4$ (CBbunny.dae)</figcaption>
       </td>
       <td>
         <img src="images/part4/bunny_1024_4_accum_5.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 5$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 5$ (CBbunny.dae)</figcaption>
       </td>
     </tr>
   </table>
@@ -492,33 +492,33 @@
     <tr align="center">
       <td>
         <img src="images/part4/bunny_1024_4_rr_0.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 0$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 0$ (CBbunny.dae)</figcaption>
       </td>
       <td>
         <img src="images/part4/bunny_1024_4_rr_1.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 1$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 1$ (CBbunny.dae)</figcaption>
       </td>
     </tr>
     <br>
     <tr align="center">
       <td>
         <img src="images/part4/bunny_1024_4_rr_2.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 2$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 2$ (CBbunny.dae)</figcaption>
       </td>
       <td>
         <img src="images/part4/bunny_1024_4_rr_3.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 3$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 3$ (CBbunny.dae)</figcaption>
       </td>
     </tr>
     <br>
     <tr align="center">
       <td>
         <img src="images/part4/bunny_1024_4_rr_4.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 4$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 4$ (CBbunny.dae)</figcaption>
       </td>
       <td>
         <img src="images/part4/bunny_1024_4_rr_5.png" align="middle" width="400px"/>
-        <figcaption>$\textt{max_ray_depth} = 5$ (CBbunny.dae)</figcaption>
+        <figcaption>$\texttt{max_ray_depth} = 5$ (CBbunny.dae)</figcaption>
       </td>
     </tr>
   </table>
@@ -580,6 +580,115 @@
 
 <p>
   Here we show rendered views of the Cornell box with Lambertian spheres at the different pixel sampling rates. Each render looks approximately the same in expectation, just with different levels of noise. The one sample per pixel render is very noisy relative to the 1024 sample per pixel render which has essentially no discernible noise. The 64 sample per pixel render has noise that appears like a grain on the image, and the 16 sample per pixel render appears slightly grainier. By 1 sample, it is hard to think of the noise as grain, as it is extremely noisy. However, all images do show soft shadows and indirect lighting associated with several bounces, as we use 5 levels maximum bounces in each of these renders. The effect of fewer samples per pixel is essentially that we increase grain, which we can associate in a real camera with a shorter exposure time or equivalently, a smaller aperture size (fewer photons reach the sensor).
+</p>
+
+<br>
+
+<h2 align="middle">Part 5: Adaptive Sampling</h2>
+
+<br>
+
+<h3 align="left">Explain adaptive sampling. Walk through your implementation of the adaptive sampling.</h3>
+
+<p>
+  For adaptive sampling, we impose a maximum number of samples per pixel and a frequency at which to check for convergence. Each time we reach the frequency, we compute a 95% confidence interval for the illumination of the pixel. If the width of the confidence interval is less than a specified fraction of the estimated illumination, then we break, assuming we are sufficiently converged. If the width is wider, we continue to take more samples and check the next time we reach the frequency. We compute the 95% confidence interval by using the sample standard deviation and multiplying by 1.96 (assuming a normal distribution). We check for convergence only at the frequency to reduce the number of calculations for each pixel sample. The estimate we make for the illumination is the average over the number of samples that we take (potentially less than the maximum number of samples). We find that we are able to generate passable images with a tolerance of 5% noise in an order of magnitude less time than our runs without adaptive sampling.
+</p>
+
+<br>
+
+<h3 align="left">Pick two scenes and render them with at least 2048 samples per pixel. Show a good sampling rate image with clearly visible differences in sampling rate over various regions and pixels. Include both your sample rate image, which shows your how your adaptive sampling changes depending on which part of the image you are rendering, and your noise-free rendered result. Use 1 sample per light and at least 5 for max ray depth.</h3>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part5/bunny_2048_1_adapt.png" align="middle" width="400px"/>
+        <figcaption>Rendered image (CBBunny.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/bunny_2048_1_adapt_rate.png" align="middle" width="400px"/>
+        <figcaption>Sample rate image (CBBunny.dae)</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/part4/bench_2048_1_adapt.png" align="middle" width="400px"/>
+        <figcaption>Rendered image (bench.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/bench_2048_1_adapt_rate.png" align="middle" width="400px"/>
+        <figcaption>Sample rate image (bench.dae)</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<p>
+  We render these images with 2048 samples per pixel, 1 sample per light, Russian roulette, maximum depth of 100 bounces, and a sample batch frequency of 16 pixels with a tolerance of 0.05. We see that shadowy and darker regions require more samples per pixel, likely due to a greater portion of the illumination coming from indirect lighting. In addition, our convergence criterion is a relative condition, that the noise is a fraction of the illumination. Therefore, for dark regions, we impose a tighter absolute exit condition, meaning that more samples are needed. These two effects together lead to the observed sampling rates. The light source converges very quickly, since all rays have a very similar bright intensity and the light source (in this image) has a low reflectance. Interestingly, the dark region of the floor in the bench shows a high sampling rate needed, likely due to the reflectance being near zero, but slightly greater than zero. This means many samples are needed for convergence, even though it looks black on a glance.
+</p>
+
+<br>
+
+<h2 align="middle">Part 6: Extra Credit</h2>
+
+<br>
+
+<h3 align="left">Optimizing the BVH: Implementing SAH and faster construction</h3>
+
+<p>
+  Our method for finding the best split has a few optimizations, one being the SAH, which speeds up the rendering. Our implementation is described in Part 2. We can easily modify our code to test splitting at the median of the widest axis, by setting the cost to be the difference between the number of left and right primitives. We also test splitting at the midpoint of the widest axis. The results are tabulated. We find that SAH significantly outperforms other methods. 
+</p>
+
+<p>
+  The second optimization we make is during construction. We do not test every single possible split. For a bounding box, we can evaluate each split between every primitive, but we instead just evaluate a fixed number of possible splits. The reason is that we expect the latter to sufficiently approximate the optimal split of the exhaustive search. The tradeoff to this approximation is that we test a constant number of splits, rather than N splits, where N is the number of primitives.
+</p>
+
+<div align="middle">
+  <table style="width:100%;border:1px solid black;border-collapse:collapse;">
+    <tr align="left">
+      <td style="border:1px solid black;"></td>
+      <th style="border:1px solid black;">peter.dae</th>
+      <th style="border:1px solid black;">maxplanck.dae</th>
+      <th style="border:1px solid black;">beast.dae</th>
+    </tr>
+    <br>
+    <tr align="left">
+      <th style="border:1px solid black;">Primitives</th>
+      <td style="border:1px solid black;">40018</td>
+      <td style="border:1px solid black;">50801</td>
+      <td style="border:1px solid black;">64618</td>
+    </tr>
+    <br>
+    <tr align="left">
+      <th style="border:1px solid black;">SAH</th>
+      <td style="border:1px solid black;">0.0665</td>
+      <td style="border:1px solid black;">0.0811</td>
+      <td style="border:1px solid black;">0.0576</td>
+    </tr>
+    <br>
+    <tr align="left">
+      <th style="border:1px solid black;">Center</th>
+      <td style="border:1px solid black;">0.2773</td>
+      <td style="border:1px solid black;">4.4816</td>
+      <td style="border:1px solid black;">7.9226</td>
+    </tr>
+    <br>
+    <tr align="left">
+      <th style="border:1px solid black;">Median</th>
+      <td style="border:1px solid black;">0.1321</td>
+      <td style="border:1px solid black;">0.3057</td>
+      <td style="border:1px solid black;">0.1582</td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h2 align="middle">Collaboration Statement</h2>
+
+<p>
+  Dawson wrote the majority of the initial code. Joshua worked through and debugged the code, as well as writing the code for several subtasks. Together, all code was found to match the example renders provided and appeared to produce visually satisfactory results. The writing of the report was shared, as both partners understood and could discuss the entire assignment. Most renders were carried out by Joshua, as his machine was found to render at a faster rate that Dawson’s. All renders took reasonable time. 
 </p>
   
 </body>
