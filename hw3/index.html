@@ -58,7 +58,9 @@
 
 <h2 align="middle">Part 1: Ray Generation and Scene Intersection</h2>
 
-<h3 align="middle">Walk through the ray generation and primitive intersection parts of the rendering pipeline.</h3>
+<br>
+
+<h3 align="left">Walk through the ray generation and primitive intersection parts of the rendering pipeline.</h3>
 
 <p>
     For each pixel, we generate $\texttt{ns_aa}$ number of rays to sample the scene. First, we use $\texttt{gridSampler->get_sample()}$ to get a random sample from $[0,1]\times[0,1]$ and add that to origin, the bottom left corner of the pixel. This point is in the image space. We then call $\texttt{camera->generate_ray()}$ to return a ray that goes from the camera in camera space to that point after it has been transformed from image space onto the sensor plane in camera space. After normalization, this becomes the direction for the ray (camera to sensor coordinate), while the origin is set to be the camera position. 
@@ -77,7 +79,7 @@
 
 <br>
 
-<h3 align="middle">Explain the triangle intersection algorithm you implemented in your own words.</h3>
+<h3 align="left">Explain the triangle intersection algorithm you implemented in your own words.</h3>
 
 <p>
   To implement triangle intersection, we first compute the plane intersection of the ray with the plane on which the triangle lies. We computed this plane by computing the triangle normal vector from the cross product of two of the vectors defined by the triangle’s edges. We first check if the ray is parallel to the plane (within a small tolerance) and exit if true. If the corresponding intersection point in the parameter t was outside of the range defined by the minimum and maximum, we exited with false. If it was within the permissible range, we then computed if the intersection point was within the triangle. To do so, we computed the barycentric coordinates of the point with respect to the triangle and checked if each of the coordinates was positive. We returned true only if we determined the intersection point with the plane to lie within the triangle. We computed the normal at the point by the barycentric average of the normals of each vertex.
@@ -85,7 +87,7 @@
 
 <br>
 
-<h3 align="middle">Show images with normal shading for a few small .dae files.</h3>
+<h3 align="left">Show images with normal shading for a few small .dae files.</h3>
 
 <div align="middle">
   <table style="width:100%">
@@ -113,6 +115,115 @@
   </table>
 </div>
 <br>
+
+<h2 align="middle">Part 2: Bounding Volume Hierarchy</h2>
+
+<br>
+
+<h3 align="left">Walk through your BVH construction algorithm. Explain the heuristic you chose for picking the splitting point.</h3>
+
+<p>
+    We construct the BVH using a recursive algorithm. Given the (sub) vector of primitives, we first create the bounding box that holds all the primitives. If the number of primitives is less than or equal to the max leaf size, we create a leaf node by assigning its start and end iterators to those passed in by the function call. Otherwise, we need to determine how to split the bounding box and partition the primitives using $\textt{findBestSplit()}$. 
+</p>
+
+<p>
+  Our method to find the best split tests $\textt{BINS}-1$ number of uniformly spaced splits across the width of the bounding box, for each of the three axes. In practice, we found that $\textt{BINS}=8$, a total of 27 different split possibilities, was sufficient for speedup. For each axis, we first find the bounding width of all the centroids of the primitives. Then, we determine which of the $\textt{BINS}$ bins a primitive belongs to. Additionally, we compute the bounding box of all the primitives in each bin.
+</p>
+
+<p>
+  To evaluate the cost of each split we use the surface area heuristic (SAH). For each split, we count and determine the surface area of the bounding box of all primitives on each side. This is achieved in one pass through the bins since we collected the number of primitives in and the bounding box of each bin—we keep a running sum of the left side of the split and the right side as we iterate through each split. Then for each split, we calculate the cost of the split using the SAH and keep track of the minimum, as well as the corresponding axis and split position. Finally, we return the least cost split position, the splitting axis, and the number of primitives on the left of the split ($\textt{l_count}$).
+</p>
+
+<p>
+  We then must split our vector of primitives that was passed in. First we initialize the non-leaf node with the bounding box of all the primitives. We create the children using recursive calls to $\textt{construct_bvh()}$. Because the function takes in the $\textt{start}$ and $\textt{end}$ iterator of a subvector, we accomplish this split by re-sorting the subvector such that the primitives with a centroid to the left of the split are on the left of the subvector. Then, to call the function recursively to create the left child, we simply pass in start and $\textt{start} + \textt{l_count}$ for the start and end. We pass in $\textt{start} + \textt{l_count}$ and end for the right child.
+</p>
+
+<br>
+
+<h3 align="left">Show images with normal shading for a few large .dae files that you can only render with BVH acceleration.</h3>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part2/maxplanck.png" align="middle" width="400px"/>
+        <figcaption>maxplanck.dae</figcaption>
+      </td>
+      <td>
+        <img src="images/part2/CBLucy.png" align="middle" width="400px"/>
+        <figcaption>CBLucy.dae</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/part2/beast.png" align="middle" width="400px"/>
+        <figcaption>beast.dae</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h3 align="left">Compare rendering times on a few scenes with moderately complex geometries with and without BVH acceleration. Present your results in a one-paragraph analysis.</h3>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="left">
+      <td></td>
+      <td>teapot.dae</td>
+      <td>cow.dae</td>
+      <td>beetle.dae</td>
+      <td>peter.dae</td>
+      <td>beast.dae</td>
+    </tr>
+    <br>
+    <tr align="left">
+      <td>Number of Primitives</td>
+      <td>2464</td>
+      <td>5856</td>
+      <td>7558</td>
+      <td>40018</td>
+      <td>64618</td>
+    </tr>
+    <br>
+    <tr align="left">
+      <td>Rendering w/o BVH</td>
+      <td>9.1695</td>
+      <td>23.8812</td>
+      <td>31.2788</td>
+      <td>N/A</td>
+      <td>N/A</td>
+    </tr>
+    <br>
+    <tr align="left">
+      <td>Rendering w/o BVH</td>
+      <td>9.1695</td>
+      <td>23.8812</td>
+      <td>31.2788</td>
+      <td>N/A</td>
+      <td>N/A</td>
+    </tr>
+    <br>
+    <tr align="left">
+      <td>Building BVH</td>
+      <td>0.0050</td>
+      <td>0.0215</td>
+      <td>0.0182</td>
+      <td>0.1348</td>
+      <td>0.2451</td>
+    </tr>
+    <br>
+    <tr align="left">
+      <td>Rendering w/ BVH</td>
+      <td>0.0631</td>
+      <td>0.0678</td>
+      <td>0.0662</td>
+      <td>0.0628</td>
+      <td>0.0585 (0.1014)</td>
+    </tr>
+  </table>
+</div>
   
 </body>
 </html>
