@@ -168,50 +168,50 @@
 <h3 align="left">Compare rendering times on a few scenes with moderately complex geometries with and without BVH acceleration. Present your results in a one-paragraph analysis.</h3>
 
 <div align="middle">
-  <table style="width:100%">
+  <table style="width:100%;border:1px solid black;border-collapse:collapse;">
     <tr align="left">
-      <td></td>
-      <td>teapot.dae</td>
-      <td>cow.dae</td>
-      <td>beetle.dae</td>
-      <td>peter.dae</td>
-      <td>beast.dae</td>
+      <td style="border:1px solid black;"></td>
+      <th style="border:1px solid black;">teapot.dae</th>
+      <th style="border:1px solid black;">cow.dae</th>
+      <th style="border:1px solid black;">beetle.dae</th>
+      <th style="border:1px solid black;">peter.dae</th>
+      <th style="border:1px solid black;">beast.dae</th>
     </tr>
     <br>
     <tr align="left">
-      <td>Number of Primitives</td>
-      <td>2464</td>
-      <td>5856</td>
-      <td>7558</td>
-      <td>40018</td>
-      <td>64618</td>
+      <th style="border:1px solid black;">Number of Primitives</th>
+      <td style="border:1px solid black;">2464</td>
+      <td style="border:1px solid black;">5856</td>
+      <td style="border:1px solid black;">7558</td>
+      <td style="border:1px solid black;">40018</td>
+      <td style="border:1px solid black;">64618</td>
     </tr>
     <br>
     <tr align="left">
-      <td>Rendering w/o BVH</td>
-      <td>9.1695</td>
-      <td>23.8812</td>
-      <td>31.2788</td>
-      <td>N/A</td>
-      <td>N/A</td>
+      <th style="border:1px solid black;">Rendering w/o BVH</th>
+      <td style="border:1px solid black;">9.1695</td>
+      <td style="border:1px solid black;">23.8812</td>
+      <td style="border:1px solid black;">31.2788</td>
+      <td style="border:1px solid black;">N/A</td>
+      <td style="border:1px solid black;">N/A</td>
     </tr>
     <br>
     <tr align="left">
-      <td>Rendering w/o BVH</td>
-      <td>9.1695</td>
-      <td>23.8812</td>
-      <td>31.2788</td>
-      <td>N/A</td>
-      <td>N/A</td>
+      <th style="border:1px solid black;">Rendering w/o BVH</th>
+      <td style="border:1px solid black;">9.1695</td>
+      <td style="border:1px solid black;">23.8812</td>
+      <td style="border:1px solid black;">31.2788</td>
+      <td style="border:1px solid black;">N/A</td>
+      <td style="border:1px solid black;">N/A</td>
     </tr>
     <br>
     <tr align="left">
-      <td>Building BVH</td>
-      <td>0.0050</td>
-      <td>0.0215</td>
-      <td>0.0182</td>
-      <td>0.1348</td>
-      <td>0.2451</td>
+      <th style="border:1px solid black;">Building BVH</th>
+      <td style="border:1px solid black;">0.0050</td>
+      <td style="border:1px solid black;">0.0215</td>
+      <td style="border:1px solid black;">0.0182</td>
+      <td style="border:1px solid black;">0.1348</td>
+      <td style="border:1px solid black;">0.2451</td>
     </tr>
     <br>
     <tr align="left">
@@ -224,6 +224,76 @@
     </tr>
   </table>
 </div>
+<br>
+
+<p>
+  We obtain these times using 480x360, 1 ray per pixel, 8 threads and at the default view point. We find that our BVH implementation reduces the rendering time by about 2 orders of magnitude when including the overhead of creating the BVH. We find that the rendering times are close to constant with respect to the number of primitives, but the time to construct the BVH scales linearly. For the large meshes, peter.dae and beast.dae, their reported render times are underestimated because their default views don’t take up the entire frame, causing most rays to miss entirely and the checks to terminate early. However, when focused on beast.dae’s back, the render time (reported in parentheses) is as expected.
+</p>
+
+<br>
+
+<h2 align="middle">Part 3: Direct Illumination</h2>
+
+<br>
+
+<h3 align="left">Walk through both implementations of the direct lighting function.</h3>
+  
+<p>
+  We wrote two sampling schemes to compute direct illumination. First, we did the naive method of sampling over the entire hemisphere with cosine weighting to account for Lambert’s law (hemisphere sampling). For each ray we sampled, we checked if its first intersection was with a light source. If so, we took the radiance of the light source from that point and multiplied by the cosine of the angle relative to the source due to Lambert’s law. We repeated this for the sample per light source rate (multiplied by the number of light sources).
+</p>
+
+<p>
+  The other method we used was lighting samling, in which we took sample rays only in the directions of the light sources in the scene. For point light sources, we use a single sample (since only a single point is needed), and for area light sources, we use a number of samples per source. Using the conversion of the integral from class, we then can average over the samples from each source. For each ray, we compute if it intersects an object before reaching the light source, and if it does, we say that ray provides no direct lighting. If it does not intersect any object, we then compute the contribution to the lighting. Our estimator is now changed, since we have to account for sampling only the area of the light source. The radiance and PDF information is provided by the sample_L() method inherent to the light source.
+</p>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part3/banana.png" align="middle" width="400px"/>
+        <figcaption>Point lighting</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h3 align="left">Show some images rendered with both implementations of the direct lighting function.</h3>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <th>
+        Uniform Hemisphere Sampling
+      </th>
+      <th>
+        Light Sampling
+      </th>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/part3/bunny_1_64_h.png" align="middle" width="400px"/>
+        <figcaption>CBbunny.dae 64 light rays</figcaption>
+      </td>
+      <td>
+        <img src="images/part3/bunny_1_64_d.png" align="middle" width="400px"/>
+        <figcaption>CBbunny.dae 64 light rays</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/part3/spheres_1_64_h.png" align="middle" width="400px"/>
+        <figcaption>CBspheres_lambertian.dae</figcaption>
+      </td>
+      <td>
+        <img src="images/part3/spheres_1_64_d.png" align="middle" width="400px"/>
+        <figcaption>CBspheres_lambertian.dae</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
   
 </body>
 </html>
