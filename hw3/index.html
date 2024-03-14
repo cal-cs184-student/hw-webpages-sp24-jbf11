@@ -150,8 +150,8 @@
         <figcaption>maxplanck.dae</figcaption>
       </td>
       <td>
-        <img src="images/part2/CBLucy.png" align="middle" width="400px"/>
-        <figcaption>CBLucy.dae</figcaption>
+        <img src="images/part2/CBlucy.png" align="middle" width="400px"/>
+        <figcaption>CBlucy.dae</figcaption>
       </td>
     </tr>
     <br>
@@ -312,11 +312,11 @@
     <br>
     <tr align="center">
       <td>
-        <img src="images/part3/spheres_1_16_d.png" align="middle" width="400px"/>
+        <img src="images/part3/bunny_1_16_d.png" align="middle" width="400px"/>
         <figcaption>16 Light Rays (CBBunny.dae)</figcaption>
       </td>
       <td>
-        <img src="images/part3/spheres_1_64_d.png" align="middle" width="400px"/>
+        <img src="images/part3/bunny_1_64_d.png" align="middle" width="400px"/>
         <figcaption>64 Light Rays (CBBunny.dae)</figcaption>
       </td>
     </tr>
@@ -517,8 +517,8 @@
         <figcaption>$\texttt{max_ray_depth} = 4$ (CBbunny.dae)</figcaption>
       </td>
       <td>
-        <img src="images/part4/bunny_1024_4_rr_5.png" align="middle" width="400px"/>
-        <figcaption>$\texttt{max_ray_depth} = 5$ (CBbunny.dae)</figcaption>
+        <img src="images/part4/bunny_1024_4_rr_100.png" align="middle" width="400px"/>
+        <figcaption>$\texttt{max_ray_depth} = 100$ (CBbunny.dae)</figcaption>
       </td>
     </tr>
   </table>
@@ -526,7 +526,7 @@
 <br>
   
 <p>
-  The above renders were computed using a stopping probability of 0.2. As with the previous analysis of a fixed depth, we see that adding levels to the depth provides a richer illumination with greater indirect illumination. However, we find that when we use a fixed depth, there is an increase in brightness with each layer associated with the diffuse indirect light from each level of bounces. In Russian roulette on the other hand, we see a less dramatic increase in brightness. There is still some increase in the brightness, since the Russian roulette estimator is biased when we impose a maximum depth, but the effect is greatly diminished. This is because many rays exit before reaching the maximum depth and have their brightnesses adjusted accordingly. Overall, the renders are quite similar to the corresponding renders where all rays traverse the maximum depth, but these were computed in dramatically decreased time when compared to the maximum depth renders. We could get even further decreased time by increasing the stopping probability at the cost of introducing additional noise. For our given stopping probability and choice of 1024 samples per pixel, we do not see a severe amount of noise.
+  The above renders were computed using a stopping probability of 0.2. As with the previous analysis of a fixed depth, we see that adding levels to the depth provides a richer illumination with greater indirect illumination. However, we find that when we use a fixed depth, there is an increase in brightness with each layer associated with the diffuse indirect light from each level of bounces. In Russian roulette on the other hand, we see a less dramatic increase in brightness. There is still some increase in the brightness, since the Russian roulette estimator is biased when we impose a maximum depth, but the effect is greatly diminished. This is because many rays exit before reaching the maximum depth and have their brightnesses adjusted accordingly. Overall, the renders are quite similar to the corresponding renders where all rays traverse the maximum depth, but these were computed in dramatically decreased time when compared to the maximum depth renders. We could get even further decreased time by increasing the stopping probability at the cost of introducing additional noise. For our given stopping probability and choice of 1024 samples per pixel, we do not see a severe amount of noise. We also see that we can reach maximum depths (100 bounces) that are unobtainable in a standard algorithm where all rays are traced to this distance.
 </p>
 
 <br>
@@ -542,36 +542,36 @@
       </td>
       <td>
         <img src="images/part4/spheres_2_4_accum_5.png" align="middle" width="400px"/>
-        <figcaption>2 sample per pixel (CBspheres.dae)</figcaption>
+        <figcaption>2 samples per pixel (CBspheres.dae)</figcaption>
       </td>
     </tr>
     <br>
     <tr align="center">
       <<td>
         <img src="images/part4/spheres_4_4_accum_5.png" align="middle" width="400px"/>
-        <figcaption>4 sample per pixel (CBspheres.dae)</figcaption>
+        <figcaption>4 samples per pixel (CBspheres.dae)</figcaption>
       </td>
       <td>
         <img src="images/part4/spheres_8_4_accum_5.png" align="middle" width="400px"/>
-        <figcaption>8 sample per pixel (CBspheres.dae)</figcaption>
+        <figcaption>8 samples per pixel (CBspheres.dae)</figcaption>
       </td>
     </tr>
     <br>
     <tr align="center">
       <td>
         <img src="images/part4/spheres_16_4_accum_5.png" align="middle" width="400px"/>
-        <figcaption>16 sample per pixel (CBspheres.dae)</figcaption>
+        <figcaption>16 samples per pixel (CBspheres.dae)</figcaption>
       </td>
       <td>
         <img src="images/part4/spheres_64_4_accum_5.png" align="middle" width="400px"/>
-        <figcaption>64 sample per pixel (CBspheres.dae)</figcaption>
+        <figcaption>64 samples per pixel (CBspheres.dae)</figcaption>
       </td>
     </tr>
     <br>
     <tr align="center">
       <td>
         <img src="images/part4/spheres_1024_4_accum_5.png" align="middle" width="400px"/>
-        <figcaption>1024 sample per pixel (CBspheres.dae)</figcaption>
+        <figcaption>1024 samples per pixel (CBspheres.dae)</figcaption>
       </td>
     </tr>
   </table>
@@ -606,18 +606,18 @@
         <figcaption>Rendered image (CBBunny.dae)</figcaption>
       </td>
       <td>
-        <img src="images/part4/bunny_2048_1_adapt_rate.png" align="middle" width="400px"/>
+        <img src="images/part5/bunny_2048_1_adapt_rate.png" align="middle" width="400px"/>
         <figcaption>Sample rate image (CBBunny.dae)</figcaption>
       </td>
     </tr>
     <br>
     <tr align="center">
       <td>
-        <img src="images/part4/bench_2048_1_adapt.png" align="middle" width="400px"/>
+        <img src="images/part5/bench_2048_1_adapt.png" align="middle" width="400px"/>
         <figcaption>Rendered image (bench.dae)</figcaption>
       </td>
       <td>
-        <img src="images/part4/bench_2048_1_adapt_rate.png" align="middle" width="400px"/>
+        <img src="images/part5/bench_2048_1_adapt_rate.png" align="middle" width="400px"/>
         <figcaption>Sample rate image (bench.dae)</figcaption>
       </td>
     </tr>
