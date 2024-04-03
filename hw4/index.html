@@ -108,7 +108,7 @@
 
 <h2 align="middle">Part II: Simulation via numerical integration</h2>
 
-<h3 align="left">Experiment with some of the parameters in the simulation. To do so, pause the simulation at the start with P, modify the values of interest, and then resume by pressing P again. You can also restart the simulation at any time from the cloth's starting position by pressing R. Describe the effects of changing the spring constant $\textt{ks}$; how does the cloth behave from start to rest with a very low $\textt{ks}$? A high $\textt{ks}$?</h3>
+<h3 align="left">Experiment with some of the parameters in the simulation. To do so, pause the simulation at the start with P, modify the values of interest, and then resume by pressing P again. You can also restart the simulation at any time from the cloth's starting position by pressing R. Describe the effects of changing the spring constant $\texttt{ks}$; how does the cloth behave from start to rest with a very low $\texttt{ks}$? A high $\texttt{ks}$?</h3>
 
 <p>
   With a low spring constant (10 N/m), the cloth behaves very loosely as it drops, with waves rippling through the sheet. With a high spring constant (10,000 N/m), it drops very rigidly. At rest, the low spring constant sheet drapes heavily, while the high spring constant has less effect.
@@ -130,7 +130,7 @@
 </div>
 <br>
 
-<h3 align="left">What about for $\textt{density}$?</h3>
+<h3 align="left">What about for $\texttt{density}$?</h3>
 
 <p>
   A low-density (1 g/cm^2) cloth has very little weight, so as it falls, it does not pull the springs and cause large ripples. A dense (10,000 g/cm^2) cloth is heavier, so it drapes more and pulls itself toward the ground.
@@ -152,7 +152,7 @@
 </div>
 <br>
 
-<h3 align="left">What about for $\textt{damping}$?</h3>
+<h3 align="left">What about for $\texttt{damping}$?</h3>
 
 <p>
   Damping affects how much energy is lost as the springs move. With low damping, the cloth takes a long time to reach rest as it keeps swinging, as its energy dissipates very slowly (underdamped case). The cloth mesh is heavily distorted while it falls. With high damping, the cloth does not distort as much when it falls. It also does not swing as it falls, moving smoothly to its resting position. This occurs when damping dominates the oscillatory driving force of the spring constant (overdamped case).
@@ -174,7 +174,7 @@
 </div>
 <br>
 
-<h3 align="left">Show us a screenshot of your shaded cloth from $\textt{scene/pinned4.json}$ in its final resting state! If you choose to use different parameters than the default ones, please list them.</h3>
+<h3 align="left">Show us a screenshot of your shaded cloth from $\texttt{scene/pinned4.json}$ in its final resting state! If you choose to use different parameters than the default ones, please list them.</h3>
 
 <p>
   Below is the cloth with the default parameters in the four points pinned configuration at its resting state. We see the four corners are held and the cloth drapes relative to the corners. Blinn-Phong shading is employed.
@@ -185,7 +185,7 @@
     <tr align="center">
       <td>
         <img src="images/part2/4pinned_bp.png" align="middle" width="400px"/>
-        <figcaption>$\textt{scene/pinned4.json}$</figcaption>
+        <figcaption>$\texttt{scene/pinned4.json}$</figcaption>
       </td>
     </tr>
   </table>
@@ -200,7 +200,7 @@
 
 <br>
 
-<h3 align="left">Show us screenshots of your shaded cloth from $\textt{scene/sphere.json}$ in its final resting state on the sphere using the default $\textt{ks = 5000}$ as well as with $\textt{ks = 500}$ and $\textt{ks = 50000}$. Describe the differences in the results.</h3>
+<h3 align="left">Show us screenshots of your shaded cloth from $\texttt{scene/sphere.json}$ in its final resting state on the sphere using the default $\texttt{ks = 5000}$ as well as with $\texttt{ks = 500}$ and $\texttt{ks = 50000}$. Describe the differences in the results.</h3>
 
 <p>
   The weak strength cloth hugs the shape of the sphere and falls straight down. As the spring constant is increased, the cloth has more internal rigidity. The high strength cloth holds its shape and creases of the cloth stick out instead of down.
@@ -211,15 +211,15 @@
     <tr align="center">
       <td>
         <img src="images/part3/cloth_sphere_500.png" align="middle" width="400px"/>
-        <figcaption>$\textt{ks = 500}$</figcaption>
+        <figcaption>$\texttt{ks = 500}$</figcaption>
       </td>
       <td>
         <img src="images/part3/cloth_sphere_5000.png" align="middle" width="400px"/>
-        <figcaption>$\textt{ks = 5000}$</figcaption>
+        <figcaption>$\texttt{ks = 5000}$</figcaption>
       </td>
       <td>
         <img src="images/part3/cloth_sphere_50000.png" align="middle" width="400px"/>
-        <figcaption>$\textt{ks = 50000}$</figcaption>
+        <figcaption>$\texttt{ks = 50000}$</figcaption>
       </td>
     </tr>
   </table>
@@ -239,6 +239,258 @@
   </table>
 </div>
 <br>
+
+<h2 align="middle">Part IV: Handling self-collisions</h2>
+
+<p>
+  We implemented self collisions as described in the problem statement using a hash table. We chose box dimensions in all three dimensions and then assigned boxes in space integer-valued ordered triples based on their position relative to the origin (how many signed boxes away from the origin they were in each direction). To construct a single hash value for each box, we took the sum of the triple with each coordinate multiplied by an increasing multiple of pi. This way, each box had a unique floating point value, since pi is irrational, so the sum of an integer, an integer multiplied by pi, and an integer multiplied by pi squared will uniquely represent the ordered triple given by the integers. After constructing the hash table with all the points mapped to the corresponding bins, we then computed self collisions within each box of the domain. The shortcoming with this method is that two points could be arbitrarily close together, but fall in different boxes if the boundary between boxes was between them. A more complete algorithm could check for particles in all eight neighboring boxes as well and compute if any collisions occur. However, from the results below, we see that this is not sufficient for satisfactory dynamics in the cases below. Certainly, some cases would require more accurate simulations.
+</p>
+
+<br>
+
+<h3 align="left">Show us at least 3 screenshots that document how your cloth falls and folds on itself, starting with an early, initial self-collision and ending with the cloth at a more restful state (even if it is still slightly bouncy on the ground).</h3>
+
+<p>
+  We see that the cloth falls and forms rolls on itself. When it reaches the ground, it very slowly relaxes since we encode no friction in the cloth, so it continues to slowly relax by unfolding, although the final screenshot shown is close to its final state.
+</p>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part4/selfColl_2.png" align="middle" width="400px"/>
+        <figcaption>Early folds from self-collisions.</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/selfColl_3.png" align="middle" width="400px"/>
+        <figcaption>More folds from self-collisions.</figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/part4/selfColl_4.png" align="middle" width="400px"/>
+        <figcaption>Entire cloth self-colliding.</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/selfColl_5.png" align="middle" width="400px"/>
+        <figcaption>Relaxation of the folds after long times.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h3 align="left">Vary the $\texttt{density}$ as well as $\texttt{ks}$ and describe with words and screenshots how they affect the behavior of the cloth as it falls on itself.</h3>
+
+<p>
+  At low density, the cloth falls very slowly, which creates larger rolls as it folds over on itself. It is able to unfold since gravity has a weaker effect on it, leading to a resting state where it is nearly unfolded on the table. On the other hand, the high density cloth folds over itself several times as it falls quickly, leading to tighter rolls and the top of the cloth falling on top of all the rolls.
+</p>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part4/selfColl_low_dens_1.png" align="middle" width="400px"/>
+        <figcaption>Early state at low density.</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/selfColl_low_dens_2.png" align="middle" width="400px"/>
+        <figcaption>Late state at low density.</figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/part4/selfColl_high_dens_1.png" align="middle" width="400px"/>
+        <figcaption>Early state at high density.</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/selfColl_high_dens_2.png" align="middle" width="400px"/>
+        <figcaption>Late state at high density.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<p>
+  At low spring constant, there are not strong forces between the elements of the mesh, so they fall and pull on each other weakly. This leads to a rougher cloth as the interactions are weaker between elements of the cloth leading to steeper bending angles in the folds of the cloth. When the spring constant is high, the cloth resists the bending deformation, leading to more rounded folds in the cloth as the neighboring bending angles are smaller. This gives a more natural looking cloth as it falls on itself.
+</p>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part4/selfColl_low_spring_1.png" align="middle" width="400px"/>
+        <figcaption>Early state at low spring constant.</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/selfColl_low_spring_2.png" align="middle" width="400px"/>
+        <figcaption>Late state at low spring constant.</figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/part4/selfColl_high_spring_1.png" align="middle" width="400px"/>
+        <figcaption>Early state at high spring constant.</figcaption>
+      </td>
+      <td>
+        <img src="images/part4/selfColl_high_spring_2.png" align="middle" width="400px"/>
+        <figcaption>Late state at high spring constant.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h2 align="middle">Part V: Shaders</h2>
+
+<h3 align="left">Explain in your own words what a shader program is and how vertex and fragment shaders work together to create lighting and material effects.</h3>
+  
+<p>
+  A shader program is a program dedicated only to the coloring of a scene based on a simple lighting model designed to run efficiently in parallel on a GPU. This reduces rendering time such that real-time rendering is possible. A shader program consists of a vertex shader and a fragment shader. The vertex shader computes a vertex’s position in world space, its coordinates in some mapped space (e.g., for a texture map), its normal vector, and a tangent vector (both in world space). This computation possibly includes some manipulations, as in the bump mapping. It outputs the position in screen space for the vertex to be rendered. A fragment shader operates on samples, using the information provided by the vertex shader. The fragment shader uses the information from the vertices to compute the position and color in which to render the fragment in screen space.
+</p>
+
+<br>
+
+<h3 align="left">Explain the Blinn-Phong shading model in your own words. Show a screenshot of your Blinn-Phong shader outputting only the ambient component, a screenshot only outputting the diffuse component, a screenshot only outputting the specular component, and one using the entire Blinn-Phong model.</h3>
+
+<p>
+  The Blinn-Phong shading model is a physically-motivated lighting model that does not require ray tracing. It includes three contributions to the light intensity. First is an ambient contribution that is assumed to be uniform everywhere. Second is a diffuse contribution assumed to come from a point light source in which the reflected diffuse light is assumed to follow Lambert’s cosine law. Third is a specular contribution from the same point light source that is assumed to be focused in the mirror direction, with a parameter governing the narrowness of the focus. Together, these three contributions make for a visually satisfactory shading model for many applications, but lacks the complexity of a global light transport simulation.
+</p>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part5/ambient.png" align="middle" width="400px"/>
+        <figcaption>Ambient contribution.</figcaption>
+      </td>
+      <td>
+        <img src="images/part5/diffuse.png" align="middle" width="400px"/>
+        <figcaption>Diffuse contribution.</figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/part5/specular.png" align="middle" width="400px"/>
+        <figcaption>Specular contribution.</figcaption>
+      </td>
+      <td>
+        <img src="images/part5/phong.png" align="middle" width="400px"/>
+        <figcaption>Overlay of all contributions.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h3 align="left">Show a screenshot of your texture mapping shader using your own custom texture by modifying the textures in $\texttt{/textures/}$.</h3>
+
+<p>
+  We chose to map an image of a school of Pacific sardines, provided by the Monterey Bay Aquarium. The texture is wrapped on to the sphere and cloth using the texture sampler.
+</p>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part5/texture_sphere.png" align="middle" width="400px"/>
+        <figcaption>Texture mapping on sphere.</figcaption>
+      </td>
+      <td>
+        <img src="images/part5/texture_cloth.png" align="middle" width="400px"/>
+        <figcaption>Texture mapping on cloth.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h3 align="left">Show a screenshot of bump mapping on the cloth and on the sphere. Show a screenshot of displacement mapping on the sphere. Use the same texture for both renders. You can either provide your own texture or use one of the ones in the textures directory, BUT choose one that's not the default $\texttt{texture_2.png}$. Compare the two approaches and resulting renders in your own words. Compare how your two shaders react to the sphere by changing the sphere mesh's coarseness by using $\texttt{-o 16 -a 16}$ and then $\texttt{-o 128 -a 128}$.</h3>
+
+<p>
+  The bump map alters the angle at which light reflects off the surface, but does not change the position of the vertices that make up the sphere. This is visible by looking at the silhouette of the sphere. The bump map sphere is perfectly round, while the sphere with displacement mapping is irregular. The displacement map simply adds the vertex displacement on top of the shading, which adds an extra layer of realism.
+</p>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part5/bump_sphere_16.png" align="middle" width="400px"/>
+        <figcaption>Bump mapping, $16\times 16$.</figcaption>
+      </td>
+      <td>
+        <img src="images/part5/disp_sphere_16.png" align="middle" width="400px"/>
+        <figcaption>Displacement mapping, $16\times 16$.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<p>
+  Compared to the coarser sphere, the fine sphere is similar with just bump mapping. However, with displacement mapping, the silhouette of the sphere closely conforms to the contour lines of the brick texture in the finer discretization. There are indents where there is mortar, and a raised profile at the bricks. In the coarse displacement mapped sphere, the edges do not as accurately depict the texture of bricks.
+</p>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part5/bump_sphere_128.png" align="middle" width="400px"/>
+        <figcaption>Bump mapping, $128\times 128$.</figcaption>
+      </td>
+      <td>
+        <img src="images/part5/disp_sphere_128.png" align="middle" width="400px"/>
+        <figcaption>Displacement mapping, $128\times 128$.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<p>
+  We see a similar effect with the cloth. The silhouette of the cloth is significantly changed with displacement mapping, even though the lighting effect is similar. The cloth with bump mapping hangs straight down, while the cloth with texture has raised and indented areas.
+</p>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part5/bump_cloth.png" align="middle" width="400px"/>
+        <figcaption>Bump mapping, $50\times 50$.</figcaption>
+      </td>
+      <td>
+        <img src="images/part5/disp_cloth.png" align="middle" width="400px"/>
+        <figcaption>Displacement mapping, $50\times 50$.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h3 align="left">Show a screenshot of your mirror shader on the cloth and on the sphere.</h3>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part5/mirror_sphere.png" align="middle" width="400px"/>
+        <figcaption>Mirror shader on the sphere.</figcaption>
+      </td>
+      <td>
+        <img src="images/part5/mirror_cloth.png" align="middle" width="400px"/>
+        <figcaption>Mirror shader on the cloth.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h2 align="middle">Collaboration Statement</h2>
+
+<p>
+  Joshua wrote the majority of the initial code. Dawson worked through and debugged the code, as well as writing the code for several subtasks. Together, all code was found to match the example renders provided and appeared to produce visually satisfactory results. The writing of the report was shared, as both partners understood and could discuss the entire assignment. Final renders were carried out by Dawson, and Joshua assembled the report in the HTML file.
+</p>
 
   
 </body>
