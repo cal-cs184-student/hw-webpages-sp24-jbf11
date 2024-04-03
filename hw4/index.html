@@ -74,7 +74,7 @@
   <table style="width:100%">
     <tr align="center">
       <td>
-        <img src="images/part1/structural.png" align="middle" width="400px"/>
+        <img src="images/part1/no_shear_wire.png" align="middle" width="400px"/>
         <figcaption>Structural and Bending Constraints</figcaption>
       </td>
     </tr>
@@ -86,7 +86,7 @@
   <table style="width:100%">
     <tr align="center">
       <td>
-        <img src="images/part1/shearing.png" align="middle" width="400px"/>
+        <img src="images/part1/shear_wire.png" align="middle" width="400px"/>
         <figcaption>Shearing Constraints</figcaption>
       </td>
     </tr>
@@ -98,7 +98,7 @@
   <table style="width:100%">
     <tr align="center">
       <td>
-        <img src="images/part1/all.png" align="middle" width="400px"/>
+        <img src="images/part1/all_wire.png" align="middle" width="400px"/>
         <figcaption>All Constraints</figcaption>
       </td>
     </tr>
@@ -118,11 +118,11 @@
   <table style="width:100%">
     <tr align="center">
       <td>
-        <img src="images/part2/ks_low.png" align="middle" width="400px"/>
+        <img src="images/part2/low_spring.png" align="middle" width="400px"/>
         <figcaption>Low spring constant at rest</figcaption>
       </td>
       <td>
-        <img src="images/part2/ks_high.png" align="middle" width="400px"/>
+        <img src="images/part2/high_spring.png" align="middle" width="400px"/>
         <figcaption>High spring constant at rest</figcaption>
       </td>
     </tr>
@@ -140,11 +140,11 @@
   <table style="width:100%">
     <tr align="center">
       <td>
-        <img src="images/part2/density_low.png" align="middle" width="400px"/>
+        <img src="images/part2/low_dense.png" align="middle" width="400px"/>
         <figcaption>Low density at rest</figcaption>
       </td>
       <td>
-        <img src="images/part2/density_high.png" align="middle" width="400px"/>
+        <img src="images/part2/high_dense.png" align="middle" width="400px"/>
         <figcaption>High density at rest</figcaption>
       </td>
     </tr>
@@ -162,11 +162,11 @@
   <table style="width:100%">
     <tr align="center">
       <td>
-        <img src="images/part2/damping_low.png" align="middle" width="400px"/>
+        <img src="images/part2/low_dampen.png" align="middle" width="400px"/>
         <figcaption>Low damping at rest</figcaption>
       </td>
       <td>
-        <img src="images/part2/damping_high.png" align="middle" width="400px"/>
+        <img src="images/part2/high_dampen.png" align="middle" width="400px"/>
         <figcaption>High damping at rest</figcaption>
       </td>
     </tr>
@@ -177,20 +177,69 @@
 <h3 align="left">Show us a screenshot of your shaded cloth from $\textt{scene/pinned4.json}$ in its final resting state! If you choose to use different parameters than the default ones, please list them.</h3>
 
 <p>
-  Below is the cloth with the default parameters in the four points pinned configuration at its resting state. We see the four corners are held and the cloth drapes relative to the corners.
+  Below is the cloth with the default parameters in the four points pinned configuration at its resting state. We see the four corners are held and the cloth drapes relative to the corners. Blinn-Phong shading is employed.
 </p>
 
 <div align="middle">
   <table style="width:100%">
     <tr align="center">
       <td>
-        <img src="images/part2/pinned.png" align="middle" width="400px"/>
+        <img src="images/part2/4pinned_bp.png" align="middle" width="400px"/>
         <figcaption>$\textt{scene/pinned4.json}$</figcaption>
       </td>
     </tr>
   </table>
 </div>
 <br>
+
+<h2 align="middle">Part III: Handling collisions with other objects</h2>
+
+<p>
+  We implemented object collisions as described in the problem statement by iterating over each point mass and treating the collisions mass-by-mass. For sphere collisions, we simply computed if the point mass was within the sphere, and if it was, we projected the point onto the sphere’s surface and then slightly off the surface to avoid planar intersections. This is because all three points of a triangle could be outside of the sphere, but the triangle itself could intersect the sphere. Adding a cushion decreases the risk of such a collision. For planar collisions, we computed if the previous position of the point and the current position were on different sides of the plane. If so, we projected the current position onto the surface of the plane, and as with the sphere case, projected it slightly further off the surface. This prevented numerical issues of struggling to differentiate on which side of the plane the point should be found on the next step.
+</p>
+
+<br>
+
+<h3 align="left">Show us screenshots of your shaded cloth from $\textt{scene/sphere.json}$ in its final resting state on the sphere using the default $\textt{ks = 5000}$ as well as with $\textt{ks = 500}$ and $\textt{ks = 50000}$. Describe the differences in the results.</h3>
+
+<p>
+  The weak strength cloth hugs the shape of the sphere and falls straight down. As the spring constant is increased, the cloth has more internal rigidity. The high strength cloth holds its shape and creases of the cloth stick out instead of down.
+</p>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part3/cloth_sphere_500.png" align="middle" width="400px"/>
+        <figcaption>$\textt{ks = 500}$</figcaption>
+      </td>
+      <td>
+        <img src="images/part3/cloth_sphere_5000.png" align="middle" width="400px"/>
+        <figcaption>$\textt{ks = 5000}$</figcaption>
+      </td>
+      <td>
+        <img src="images/part3/cloth_sphere_50000.png" align="middle" width="400px"/>
+        <figcaption>$\textt{ks = 50000}$</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h3 align="left">Show us a screenshot of your shaded cloth lying peacefully at rest on the plane. If you haven't by now, feel free to express your colorful creativity with the cloth! (You will need to complete the shaders portion first to show custom colors.)</h3>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part3/plane.png" align="middle" width="400px"/>
+        <figcaption>Cloth resting on plane with diffuse shading.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
   
 </body>
 </html>
