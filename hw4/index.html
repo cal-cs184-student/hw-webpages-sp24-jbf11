@@ -3,6 +3,7 @@
 <head>
 <style>
   body {
+    background-color: white;
     padding: 100px;
     width: 1000px;
     margin: auto;
@@ -14,15 +15,30 @@
   h1, h2, h3, h4 {
     font-family: 'Source Sans Pro', sans-serif;
   }
+  kbd {
+    color: #121212;
+  }
 </style>
-<title>CS 284A Cloth Simulator</title>
+<title>CS 284A Raytracer</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
-</head>
 
+<script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    }
+  };
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+</head>
 
 <body>
 
+<h1 align="middle"><a href="https://cal-cs184-student.github.io/hw-webpages-sp24-jbf11/hw4/index.html">Webpage</a></h1>
 <h1 align="middle">CS 284A: Computer Graphics and Imaging, Spring 2024</h1>
 <h1 align="middle">Project 4: Cloth Simulator</h1>
 <h2 align="middle">Dawson Do, Joshua Fernandes</h2>
@@ -34,10 +50,69 @@
 <h2 align="middle">Overview</h2>
 <p>Give a high-level overview of what you implemented in this project. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the project.</p>
 
+<p>
+  In this assignment, we construct a grid of point masses connected by springs to simulate a cloth-like material. We use numerical integration to simulate the dynamics of such a system, handling collisions with objects and self-collisions. We also write a variety of shaders to capture various shading methods, including Blinn-Phong shading, texture mapping, displacement and bump mapping, and environment mapping. Overall, we construct a simple physically-based simulation that can render dynamics in real time.
+</p>
+
 <br>
 
 <h2 align="middle">Part I: Masses and springs</h2>
 
+<p>
+  We implemented the point masses by adding them to a vector in row major order. We then constructed all the springs by considering the appropriate neighbor interactions (nearest neighbors for structural, diagonal neighbors for shearing, and skip interactions for bending).
+</p>
 
+<br>
+
+<h3 align="left">Take some screenshots of scene/pinned2.json from a viewing angle where you can clearly see the cloth wireframe to show the structure of your point masses and springs. Show us what the wireframe looks like (1) without any shearing constraints, (2) with only shearing constraints, and (3) with all constraints.</h3>
+
+<p>
+  The structural constraints appear as a structured square mesh representing the cloth. These constraints connect each point mass to its four orthogonal neighbors. The shearing constraints connect each point mass to its four diagonal neighbors, also forming a quadrilateral mesh. Lastly, the bending constraints connect each point mass to each orthogonal point two steps over.
+</p>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part1/structural.png" align="middle" width="400px"/>
+        <figcaption>Structural and Bending Constraints</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part3/shearing.png" align="middle" width="400px"/>
+        <figcaption>Shearing Constraints</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/part3/all.png" align="middle" width="400px"/>
+        <figcaption>All Constraints</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<h2 align="middle">Part II: Simulation via numerical integration</h2>
+
+<h3 align="left">Experiment with some of the parameters in the simulation. To do so, pause the simulation at the start with P, modify the values of interest, and then resume by pressing P again. You can also restart the simulation at any time from the cloth's starting position by pressing R. Describe the effects of changing the spring constant ks; how does the cloth behave from start to rest with a very low ks? A high ks?</h3>
+
+<p>
+  With a low spring constant (10 N/m), the cloth behaves very loosely as it drops, with waves rippling through the sheet. With a high spring constant (10,000 N/m), it drops very rigidly. At rest, the low spring constant sheet drapes heavily, while the high spring constant has less effect.
+</p>
+  
 </body>
 </html>
